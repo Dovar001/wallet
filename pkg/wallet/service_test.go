@@ -10,9 +10,6 @@ import (
 )
 
 func TestService_FindAccountByID_success(t *testing.T) {
-
-
-
 service := &Service{ 
 	
 	accounts: []*types.Account{
