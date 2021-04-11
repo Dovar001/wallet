@@ -280,8 +280,8 @@ func TestService_Reject_notfound(t *testing.T) {
 		return
 	}
 	err = s.Reject(payment.ID)
-	if err == nil {
-		t.Errorf("Reject(): error = %v", ErrAccountNotFound)
+	if err == ErrAccountNotFound {
+		t.Errorf("Reject(): error = %v", err)
 		return
 	}
 }
