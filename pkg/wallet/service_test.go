@@ -170,7 +170,7 @@ if !reflect.DeepEqual(expect,result){
 
 
 
-func TestService_FindPaymentByID_notfound(t *testing.T) {
+func TestService_FindPaymentByID_fail(t *testing.T) {
 	service := &Service{ 
 		
 		payments: []*types.Payment{
@@ -202,8 +202,8 @@ func TestService_FindPaymentByID_notfound(t *testing.T) {
 	
 	expect := ErrAccountNotFound
 	
-	result,err := service.FindPaymentByID("1111")
-	if err == nil {
+	result,err := service.FindPaymentByID("1112")
+	if err == ErrAccountNotFound {
 		fmt.Println(err)
 		return
 	}
