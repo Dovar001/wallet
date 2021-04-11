@@ -200,10 +200,10 @@ func TestService_FindPaymentByID_fail(t *testing.T) {
 		
 	}
 	
-	expect := ErrAccountNotFound
+	expect := ErrPaymentNotFound
 	
 	result,err := service.FindPaymentByID("1112")
-	if err == ErrAccountNotFound {
+	if err != nil {
 		fmt.Println(err)
 		return
 	}
