@@ -5,6 +5,7 @@ import (
 	"testing"
 
 	"github.com/Dovar001/wallet/pkg/types"
+	
 
 	"reflect"
 )
@@ -117,3 +118,170 @@ func TestService_FindAccountByID_notfound(t *testing.T) {
 	
 	
 	}
+
+	func TestService_FindPaymentByID_success(t *testing.T) {
+service := &Service{ 
+	
+	payments: []*types.Payment{
+
+	{
+		ID: "1111",
+		Amount: 1000 ,
+		
+	},
+	{
+		ID: "2222",
+		Amount: 2000 ,
+	},
+	{
+		ID: "3333",
+		Amount: 3000 ,
+	},
+	{
+		ID: "4444",
+		Amount: 4000 ,
+	},
+	{
+		ID: "5555",
+		Amount: 5000 ,
+	},
+	},
+	
+}
+
+expect := types.Payment{
+	ID: "1111",
+	Amount: 1000 ,	
+}
+
+result,err := service.FindPaymentByID("1111")
+if err == nil {
+	fmt.Println(err)
+	return
+}
+
+
+if !reflect.DeepEqual(expect,result){
+	t.Errorf("invalid result, expected: %v, actual:%v", expect , result)
+}
+
+
+}
+
+
+
+func TestService_FindPaymentByID_notfound(t *testing.T) {
+	service := &Service{ 
+		
+		payments: []*types.Payment{
+	
+		{
+			ID: "1111",
+			Amount: 1000 ,
+			
+		},
+		{
+			ID: "2222",
+			Amount: 2000 ,
+		},
+		{
+			ID: "3333",
+			Amount: 3000 ,
+		},
+		{
+			ID: "4444",
+			Amount: 4000 ,
+		},
+		{
+			ID: "5555",
+			Amount: 5000 ,
+		},
+		},
+		
+	}
+	
+	expect := ErrAccountNotFound
+	
+	result,err := service.FindPaymentByID("1111")
+	if err == nil {
+		fmt.Println(err)
+		return
+	}
+	
+	
+	if !reflect.DeepEqual(expect,result){
+		t.Errorf("invalid result, expected: %v, actual:%v", expect , result)
+	}
+	
+}
+	
+
+func TestService_Reject_success(t *testing.T) {
+
+	//создаём сервис
+	s := Service{}
+
+	//Регистрируем там пользователья 
+	phone := types.Phone("+992000000001")
+	account, err := s.RegisterAccount(phone)
+	
+	if err != nil {
+     t.Errorf("Reject(): can not register account, errror = %v", err)
+  return
+	}
+	//пополняем его счёт 
+
+	err = s.Deposit(account.ID, 10_000_00)
+	
+	if err != nil {
+		t.Errorf("Reject(): can not deposit account, error = %v", err)
+		return
+	}
+	//осуществляем платёж на его счёт
+
+	payment, err := s.Pay(account.ID, 1000_00, "auto")
+	if err != nil {
+		t.Errorf("Reject(): can not creat payment, error = %v", err)
+		return
+	}
+	err = s.Reject(payment.ID)
+	if err != nil {
+		t.Errorf("Reject(): error = %v", err)
+		return
+	}
+}	
+
+func TestService_Reject_notfound(t *testing.T) {
+
+	//создаём сервис
+	s := Service{}
+
+	//Регистрируем там пользователья 
+	phone := types.Phone("+992000000001")
+	account, err := s.RegisterAccount(phone)
+	
+	if err != nil {
+     t.Errorf("Reject(): can not register account, errror = %v", err)
+  return
+	}
+	//пополняем его счёт 
+
+	err = s.Deposit(account.ID, 10_000_00)
+	
+	if err != nil {
+		t.Errorf("Reject(): can not deposit account, error = %v", err)
+		return
+	}
+	//осуществляем платёж на его счёт
+
+	payment, err := s.Pay(account.ID, 1000_00, "auto")
+	if err != nil {
+		t.Errorf("Reject(): can not creat payment, error = %v", err)
+		return
+	}
+	err = s.Reject(payment.ID)
+	if err == nil {
+		t.Errorf("Reject(): error = %v", ErrAccountNotFound)
+		return
+	}
+}
