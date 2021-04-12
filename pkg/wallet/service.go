@@ -18,7 +18,16 @@ type errorString struct{
 func (e *errorString) Error() string {
 	return e.s
 }
-
+var defaultTestAccount = testAccount{
+	phone: "+992000000001",
+	balance: 10_000_00,
+	payments: []struct {
+    amount types.Money
+	category types.PaymentCategory
+}{
+	{amount: 1_000_00, category: "auto"},
+	},
+}
 
 var ErrAccountNotFound = errors.New("account not found")
 var ErrAccountMustBePositive = errors.New("Amount must be greater than zero")

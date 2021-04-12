@@ -392,3 +392,24 @@ func TestService_Deposit_succes(t *testing.T){
 	}
 	
 	}
+
+
+	func TestService_addAccount_success(t *testing.T){
+
+		s:=newTestService()
+    
+		account,_,err:=s.addAccount(defaultTestAccount)
+		if err != nil{
+			t.Error(err)
+		}
+
+		expect:= defaultTestAccount
+
+			
+		if reflect.DeepEqual(account,expect){
+			t.Errorf("account not right = %v",err)
+			return
+
+		}
+
+	}
