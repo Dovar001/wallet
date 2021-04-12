@@ -10,6 +10,22 @@ import (
 	"reflect"
 )
 
+
+func newTestService() *testService{
+	return &testService{Service: &Service{}}
+}
+var defaultTestAccount = testAccount{
+	phone: "+992000000001",
+	balance: 10_000_00,
+	payments: []struct {
+    amount types.Money
+	category types.PaymentCategory
+}{
+	{amount: 1_000_00, category: "auto"},
+	},
+}
+
+
 func TestService_FindAccountByID_success(t *testing.T) {
 service := &Service{ 
 	
