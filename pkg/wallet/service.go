@@ -33,6 +33,27 @@ type Service struct{
 	payments [] *types.Payment
 }
 
+type testService struct{
+	*Service
+}
+type testAccount struct{
+
+	phone types.Phone
+	balance types.Money
+	payments []struct{
+		amount types.Money
+		category types.PaymentCategory
+	}
+}
+
+
+
+
+func newTestService() *testService{
+	return &testService{Service: &Service{}}
+}
+
+
 func (s *Service) RegisterAccount(phone types.Phone) (*types.Account,error){
 
 	for _, account := range s.accounts {
@@ -164,6 +185,39 @@ func (s *Service) FindPaymentByID(paymentID string) (*types.Payment, error) {
 	 return nil
  }
 
+func (s *testService) addAccount(data testAccount) (*types.Account, []*types.Payment, error){
+
+	//Регистрируем там пользователья
+	account, err := s.RegisterAccount(data.phone)
+
+	if err!= nil {
+		return nil, nil, fmt.Errorf("can not register account, error = %v", err)
+
+	}
+	//Пополняем его счёт 
+	err = s.Deposit(account.ID, data.balance)
+	if err != nil {
+		return nil, nil, fmt.Errorf("can not deposit account, error = %v", err)
+
+	}
+	//Выполняем платежи
+	//можем создать слайс сразу нужной длины, поскольку знаем размер
+	payments:= make([]*types.Payment, len(data.payments))
+	for i, payment := range data.payments{
+		//тогда здесь работаем через index, а не через append
+		payments[i], err = s.Pay(account.ID, payment.amount, payment.category)
+		if err!= nil {
+			return nil, nil, fmt.Errorf("can not make payment, error = %v", err)
+
+		}
+	}
+	return account, payments, nil
+}
+
+
+
+
+
 
  
  func (s *Service) Repeat(paymentID string) (*types.Payment,error){
@@ -191,10 +245,4 @@ return repayment,nil
 
 
 
- type testService struct{
-	 *Service
- }
-
- func newTestService() *testService{
-	 return &testService{Service: &Service{}}
- }
+ 
