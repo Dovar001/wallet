@@ -2,6 +2,7 @@ package wallet
 
 import (
 	"errors"
+	"fmt"
 
 	"github.com/Dovar001/wallet/pkg/types"
 	"github.com/google/uuid"
@@ -24,6 +25,7 @@ var ErrAccountMustBePositive = errors.New("Amount must be greater than zero")
 var ErrPhoneRegistered = errors.New("phone already registered")
 var ErrPaymentNotFound = errors.New("payment not found")
 var ErrNotEnoughBalance = errors.New("not enough balance")
+var ErrCannotRepeat = errors.New("can nor Repeat")
 
 type Service struct{
 	nextAccountID int64
@@ -162,3 +164,37 @@ func (s *Service) FindPaymentByID(paymentID string) (*types.Payment, error) {
 	 return nil
  }
 
+
+ 
+ func (s *Service) Repeat(paymentID string) (*types.Payment,error){
+
+	
+
+payment,err := s.FindPaymentByID(paymentID)
+if err != nil{
+	return nil, fmt.Errorf("can not find payment, %v",ErrPaymentNotFound)
+}
+
+repayment := &types.Payment {
+  ID : uuid.New().String(),
+  AccountID: payment.AccountID,
+  Amount: payment.Amount,
+  Category: payment.Category,
+  Status: payment.Status,
+}
+return repayment,nil
+
+ }
+
+
+
+
+
+
+ type testService struct{
+	 *Service
+ }
+
+ func newTestService() *testService{
+	 return &testService{Service: &Service{}}
+ }
