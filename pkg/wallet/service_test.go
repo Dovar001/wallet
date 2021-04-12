@@ -332,3 +332,39 @@ func TestService_Repeat_success(t *testing.T){
 		}
 }
 
+func TestService_Pay_succes(t *testing.T){
+//создаём сервис
+s := Service{}
+
+//Регистрируем там пользователья 
+phone := types.Phone("+992000000001")
+account, err := s.RegisterAccount(phone)
+
+if err != nil {
+ t.Errorf(" can not register account, errror = %v", err)
+return
+}
+//пополняем его счёт 
+
+err = s.Deposit(account.ID, 10_000_00)
+
+if err != nil {
+	t.Errorf("can not deposit account, error = %v", err)
+	return
+}
+//осуществляем платёж на его счёт
+
+payment, err := s.Pay(account.ID, 1000_00, "auto")
+if err != nil {
+	t.Errorf(" can not creat payment, error = %v", err)
+	return
+}
+
+
+if payment==nil{
+	t.Errorf("wrong repeat of payment = %v",err)
+	return
+
+}
+
+}
