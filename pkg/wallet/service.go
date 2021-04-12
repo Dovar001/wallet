@@ -170,23 +170,18 @@ func (s *Service) FindPaymentByID(paymentID string) (*types.Payment, error) {
 
  func (s *Service) Repeat(paymentID string) (*types.Payment,error){
 
-
-
 payment,err := s.FindPaymentByID(paymentID)
 if err != nil{
 	return nil, fmt.Errorf("can not find payment, %v",ErrPaymentNotFound)
 }
 
 pay,err:=s.Pay(payment.AccountID,payment.Amount,payment.Category)	
-
- repayment := &types.Payment {
-  ID : uuid.New().String(),
-  AccountID: pay.AccountID,
-  Amount: pay.Amount,
-  Category: pay.Category,
-  Status: pay.Status,
+if err != nil{
+	return nil, fmt.Errorf("can do new payment, %v",ErrPaymentNotFound)
 }
-return repayment,nil
+ pay.ID=uuid.New().String()
+
+return pay,nil
 
  }
 
