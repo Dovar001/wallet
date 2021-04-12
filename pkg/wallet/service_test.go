@@ -366,5 +366,29 @@ if payment==nil{
 	return
 
 }
-
 }
+
+
+
+func TestService_Deposit_succes(t *testing.T){
+	//создаём сервис
+	s := Service{}
+	
+	//Регистрируем там пользователья 
+	phone := types.Phone("+992000000001")
+	account, err := s.RegisterAccount(phone)
+	
+	if err != nil {
+	 t.Errorf(" can not register account, errror = %v", err)
+	return
+	}
+	//пополняем его счёт 
+	
+	err = s.Deposit(account.ID, 10_000_00)
+	
+	if err != nil {
+		t.Errorf("can not deposit account, error = %v", err)
+		return
+	}
+	
+	}
