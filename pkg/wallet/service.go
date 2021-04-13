@@ -198,7 +198,6 @@ return pay,nil
 	}
  
 	favorite := &types.Favorite{
-	  
 	  ID: uuid.New().String(),
 	  AccountID: payment.AccountID,
 	  Name: name,
@@ -206,6 +205,7 @@ return pay,nil
 	  Category: payment.Category,
 	  
   }
+  s.favorites=append(s.favorites, favorite)
 return favorite,nil
  } 
 
@@ -213,7 +213,7 @@ return favorite,nil
 func(s *Service) PayFromFavorite(favoriteID string) (*types.Payment, error){
 
 
-	findpay,err := s.FindPaymentByID(favoriteID)
+	findpay,err := s.FindFavoriteByID(favoriteID)
 
 	if err != nil {
 		return nil,ErrFavoriteNotFound
@@ -226,6 +226,24 @@ func(s *Service) PayFromFavorite(favoriteID string) (*types.Payment, error){
 
  return pay,nil
 
+}
+
+func (s *Service) FindFavoriteByID(favoriteID string) (*types.Favorite, error) {
+
+	var favorite *types.Favorite
+
+	for _, fav := range s.favorites{
+		
+		if (fav.ID==favoriteID){
+			favorite=fav
+			break
+
+		}
+	}
+	if favorite == nil {
+		return nil, ErrFavoriteNotFound
+	}
+	return favorite,nil
 }
 
  

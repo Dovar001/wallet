@@ -536,14 +536,20 @@ if err != nil {
 	t.Errorf("favorite can not found= %v", err)
 	return
 }
+findfav,err:= s.FindFavoriteByID(fav.ID)
 
-payfromfav,err := s.PayFromFavorite(fav.ID) 
+if err != nil {
+	t.Errorf("can not find payment =%v", err)
+	return
+}
+
+payfromfav,err := s.PayFromFavorite(findfav.ID) 
 
 if err != nil {
 	t.Errorf("can not pay from favorite = %v",err)
 	return
 }
-if reflect.DeepEqual(payfromfav,fav){
+if reflect.DeepEqual(payfromfav,findfav){
 
 	t.Errorf("can not pay from favorite = %v",err)
 	return
