@@ -8,6 +8,8 @@ import (
 	"github.com/google/uuid"
 )
 
+
+
 func New(text string ) error{
 	return &errorString{text}
 }
@@ -26,32 +28,17 @@ var ErrPhoneRegistered = errors.New("phone already registered")
 var ErrPaymentNotFound = errors.New("payment not found")
 var ErrNotEnoughBalance = errors.New("not enough balance")
 var ErrCannotRepeat = errors.New("can nor Repeat")
+var ErrFavoriteNotFound = errors.New("can not find favorite")
 
 type Service struct{
 	nextAccountID int64
 	accounts [] *types.Account
 	payments [] *types.Payment
+	favorites [] *types.Favorite
+
 }
 
-type testService struct{
-	*Service
-}
-type testAccount struct{
-
-	phone types.Phone
-	balance types.Money
-	payments []struct{
-		amount types.Money
-		category types.PaymentCategory
-	}
-}
-
-
-
-
-func newTestService() *testService{
-	return &testService{Service: &Service{}}
-}
+ 
 
 
 func (s *Service) RegisterAccount(phone types.Phone) (*types.Account,error){
@@ -185,64 +172,59 @@ func (s *Service) FindPaymentByID(paymentID string) (*types.Payment, error) {
 	 return nil
  }
 
-func (s *testService) addAccount(data testAccount) (*types.Account, []*types.Payment, error){
 
-	//Регистрируем там пользователья
-	account, err := s.RegisterAccount(data.phone)
-
-	if err!= nil {
-		return nil, nil, fmt.Errorf("can not register account, error = %v", err)
-
-	}
-	//Пополняем его счёт 
-	err = s.Deposit(account.ID, data.balance)
-	if err != nil {
-		return nil, nil, fmt.Errorf("can not deposit account, error = %v", err)
-
-	}
-	//Выполняем платежи
-	//можем создать слайс сразу нужной длины, поскольку знаем размер
-	payments:= make([]*types.Payment, len(data.payments))
-	for i, payment := range data.payments{
-		//тогда здесь работаем через index, а не через append
-		payments[i], err = s.Pay(account.ID, payment.amount, payment.category)
-		if err!= nil {
-			return nil, nil, fmt.Errorf("can not make payment, error = %v", err)
-
-		}
-	}
-	return account, payments, nil
-}
-
-
-
-
-
-
- 
  func (s *Service) Repeat(paymentID string) (*types.Payment,error){
-
-	
 
 payment,err := s.FindPaymentByID(paymentID)
 if err != nil{
 	return nil, fmt.Errorf("can not find payment, %v",ErrPaymentNotFound)
 }
 
-repayment := &types.Payment {
-  ID : uuid.New().String(),
-  AccountID: payment.AccountID,
-  Amount: payment.Amount,
-  Category: payment.Category,
-  Status: payment.Status,
+pay,err:=s.Pay(payment.AccountID,payment.Amount,payment.Category)	
+if err != nil{
+	return nil, fmt.Errorf("can do new payment, %v",ErrPaymentNotFound)
 }
-return repayment,nil
+ pay.ID=uuid.New().String()
+
+return pay,nil
 
  }
 
+ func (s *Service) FavoritePayment(paymentID string, name string) (*types.Favorite, error){
+
+	payment,err := s.FindPaymentByID(paymentID)
+	if err != nil {
+		return nil,ErrPaymentNotFound
+	}
+  favorite := &types.Favorite{
+	  
+	  ID: payment.ID,
+	  AccountID: payment.AccountID,
+	  Name: name,
+	  Amount: payment.Amount,
+	  Category: payment.Category,
+	  
+  }
+return favorite,nil
+ } 
 
 
+func(s *Service) PayFromFavorite(favoriteID string) (*types.Payment, error){
 
 
+	findpay,err := s.FindPaymentByID(favoriteID)
+
+	if err != nil {
+		return nil,ErrFavoriteNotFound
+	}
+ pay,err := s.Pay(findpay.AccountID,findpay.Amount,findpay.Category)
+
+ if err != nil {
+	 return nil,ErrPaymentNotFound
+ }
+
+ return pay,nil
+
+}
 
  

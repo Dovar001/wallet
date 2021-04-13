@@ -9,6 +9,33 @@ import (
 
 	"reflect"
 )
+type testService struct{
+	*Service
+}
+type testAccount struct{
+
+	phone types.Phone
+	balance types.Money
+	payments []struct{
+		amount types.Money
+		category types.PaymentCategory
+	}
+}
+
+func newTestService() *testService{
+	return &testService{Service: &Service{}}
+}
+var defaultTestAccount = testAccount{
+	phone: "+992000000001",
+	balance: 10_000_00,
+	payments: []struct {
+    amount types.Money
+	category types.PaymentCategory
+}{
+	{amount: 1_000_00, category: "auto"},
+	},
+}
+
 
 func TestService_FindAccountByID_success(t *testing.T) {
 service := &Service{ 
@@ -332,3 +359,227 @@ func TestService_Repeat_success(t *testing.T){
 		}
 }
 
+func TestService_Pay_succes(t *testing.T){
+//создаём сервис
+s := Service{}
+
+//Регистрируем там пользователья 
+phone := types.Phone("+992000000001")
+account, err := s.RegisterAccount(phone)
+
+if err != nil {
+ t.Errorf(" can not register account, errror = %v", err)
+return
+}
+//пополняем его счёт 
+
+err = s.Deposit(account.ID, 10_000_00)
+
+if err != nil {
+	t.Errorf("can not deposit account, error = %v", err)
+	return
+}
+//осуществляем платёж на его счёт
+
+payment, err := s.Pay(account.ID, 1000_00, "auto")
+if err != nil {
+	t.Errorf(" can not creat payment, error = %v", err)
+	return
+}
+
+
+if payment==nil{
+	t.Errorf("wrong repeat of payment = %v",err)
+	return
+
+}
+}
+
+
+
+func TestService_Deposit_succes(t *testing.T){
+	//создаём сервис
+	s := Service{}
+	
+	//Регистрируем там пользователья 
+	phone := types.Phone("+992000000001")
+	account, err := s.RegisterAccount(phone)
+	
+	if err != nil {
+	 t.Errorf(" can not register account, errror = %v", err)
+	return
+	}
+	//пополняем его счёт 
+	
+	err = s.Deposit(account.ID, 10_000_00)
+	
+	if err != nil {
+		t.Errorf("can not deposit account, error = %v", err)
+		return
+	}
+	
+	}
+
+
+	func TestService_addAccount_success(t *testing.T){
+
+		s:=newTestService()
+    
+		account,_,err:=s.addAccount(defaultTestAccount)
+		if err != nil{
+			t.Error(err)
+		}
+
+		expect:= defaultTestAccount
+
+			
+		if reflect.DeepEqual(account,expect){
+			t.Errorf("account not right = %v",err)
+			return
+
+		}
+
+	}
+
+func TestFavoritePayment_success(t *testing.T){
+
+//создаём сервис
+s := newTestService()
+
+//Регистрируем там пользователья 
+phone := types.Phone("+992000000001")
+account, err := s.RegisterAccount(phone)
+
+if err != nil {
+ t.Errorf(" can not register account, errror = %v", err)
+return
+}
+//пополняем его счёт 
+
+err = s.Deposit(account.ID, 10_000_00)
+
+if err != nil {
+	t.Errorf("can not deposit account, error = %v", err)
+	return
+}
+//осуществляем платёж на его счёт
+
+payment, err := s.Pay(account.ID, 1000_00, "auto")
+
+if err != nil {
+	t.Errorf(" can not creat payment, error = %v", err)
+	return
+}
+
+pay,err:= s.FindPaymentByID(payment.ID)
+
+if err != nil {
+	t.Errorf("can not find payment =%v", err)
+	return
+}
+
+fav,err := s.FavoritePayment(payment.ID, "Довар")
+
+if err != nil {
+	t.Errorf("favorite can not found= %v", err)
+	return
+}
+
+if reflect.DeepEqual(fav,pay){
+	
+	t.Errorf("favorite equal to payment = %v",err)
+			return
+
+}
+
+}
+
+func TestPayFromFavorite_success(t *testing.T){
+//создаём сервис
+s := newTestService()
+
+//Регистрируем там пользователья 
+phone := types.Phone("+992000000001")
+account, err := s.RegisterAccount(phone)
+
+if err != nil {
+ t.Errorf(" can not register account, errror = %v", err)
+return
+}
+//пополняем его счёт 
+
+err = s.Deposit(account.ID, 10_000_00)
+
+if err != nil {
+	t.Errorf("can not deposit account, error = %v", err)
+	return
+}
+//осуществляем платёж на его счёт
+
+payment, err := s.Pay(account.ID, 1000_00, "auto")
+
+if err != nil {
+	t.Errorf(" can not creat payment, error = %v", err)
+	return
+}
+
+pay,err:= s.FindPaymentByID(payment.ID)
+
+if err != nil {
+	t.Errorf("can not find payment =%v", err)
+	return
+}
+
+fav,err := s.FavoritePayment(pay.ID, "Довар")
+
+if err != nil {
+	t.Errorf("favorite can not found= %v", err)
+	return
+}
+
+payfromfav,err := s.PayFromFavorite(fav.ID) 
+
+if err != nil {
+	t.Errorf("can not pay from favorite = %v",err)
+	return
+}
+if reflect.DeepEqual(payfromfav,fav){
+
+	t.Errorf("can not pay from favorite = %v",err)
+	return
+}
+
+}
+
+
+
+	func (s *testService) addAccount(data testAccount) (*types.Account, []*types.Payment, error){
+
+		//Регистрируем там пользователья
+		account, err := s.RegisterAccount(data.phone)
+	
+		if err!= nil {
+			return nil, nil, fmt.Errorf("can not register account, error = %v", err)
+	
+		}
+		//Пополняем его счёт 
+		err = s.Deposit(account.ID, data.balance)
+		if err != nil {
+			return nil, nil, fmt.Errorf("can not deposit account, error = %v", err)
+	
+		}
+		//Выполняем платежи
+		//можем создать слайс сразу нужной длины, поскольку знаем размер
+		payments:= make([]*types.Payment, len(data.payments))
+		for i, payment := range data.payments{
+			//тогда здесь работаем через index, а не через append
+			payments[i], err = s.Pay(account.ID, payment.amount, payment.category)
+			if err!= nil {
+				return nil, nil, fmt.Errorf("can not make payment, error = %v", err)
+	
+			}
+		}
+		return account, payments, nil
+	}
+	
+	
