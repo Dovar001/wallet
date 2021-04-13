@@ -8,6 +8,8 @@ import (
 	"github.com/google/uuid"
 )
 
+
+
 func New(text string ) error{
 	return &errorString{text}
 }
@@ -26,11 +28,14 @@ var ErrPhoneRegistered = errors.New("phone already registered")
 var ErrPaymentNotFound = errors.New("payment not found")
 var ErrNotEnoughBalance = errors.New("not enough balance")
 var ErrCannotRepeat = errors.New("can nor Repeat")
+var ErrFavoriteNotFound = errors.New("can not find favorite")
 
 type Service struct{
 	nextAccountID int64
 	accounts [] *types.Account
 	payments [] *types.Payment
+	favorites [] *types.Favorite
+
 }
 
  
@@ -185,9 +190,41 @@ return pay,nil
 
  }
 
+ func (s *Service) FavoritePayment(paymentID string, name string) (*types.Favorite, error){
+
+	payment,err := s.FindPaymentByID(paymentID)
+	if err != nil {
+		return nil,ErrPaymentNotFound
+	}
+  favorite := &types.Favorite{
+	  
+	  ID: payment.ID,
+	  AccountID: payment.AccountID,
+	  Name: name,
+	  Amount: payment.Amount,
+	  Category: payment.Category,
+	  
+  }
+return favorite,nil
+ } 
 
 
+func(s *Service) PayFromFavorite(favoriteID string) (*types.Payment, error){
 
 
+	findpay,err := s.FindPaymentByID(favoriteID)
+
+	if err != nil {
+		return nil,ErrFavoriteNotFound
+	}
+ pay,err := s.Pay(findpay.AccountID,findpay.Amount,findpay.Category)
+
+ if err != nil {
+	 return nil,ErrPaymentNotFound
+ }
+
+ return pay,nil
+
+}
 
  
