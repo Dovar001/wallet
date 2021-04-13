@@ -196,9 +196,10 @@ return pay,nil
 	if err != nil {
 		return nil,ErrPaymentNotFound
 	}
-  favorite := &types.Favorite{
+ 
+	favorite := &types.Favorite{
 	  
-	  ID: payment.ID,
+	  ID: uuid.New().String(),
 	  AccountID: payment.AccountID,
 	  Name: name,
 	  Amount: payment.Amount,
