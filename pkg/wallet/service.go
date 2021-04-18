@@ -3,6 +3,9 @@ package wallet
 import (
 	"errors"
 	"fmt"
+	"log"
+	"os"
+	"strconv"
 
 	"github.com/Dovar001/wallet/pkg/types"
 	"github.com/google/uuid"
@@ -246,4 +249,41 @@ func (s *Service) FindFavoriteByID(favoriteID string) (*types.Favorite, error) {
 	return favorite,nil
 }
 
+func (s *Service) ExportToFile(path string) error{
+
+ str:=""
+
+ file,err := os.Create(path)
+	
  
+	if err != nil{
+		log.Print(err)
+		return err
+	}
+
+	defer func ()  {
+		
+		err = file.Close()
+		if err != nil {
+			log.Print(err)
+		}
+	}()
+
+for _, account := range s.accounts {
+
+	
+
+ str+= strconv.Itoa(int(account.ID))+";"
+ str+=string(account.Phone)+";"
+ str+=strconv.Itoa(int(account.Balance))+"|"
+
+	 
+}
+_,err = file.Write([]byte (str))
+if err != nil {
+    log.Print(err)
+	return err
+}
+
+return nil
+}
