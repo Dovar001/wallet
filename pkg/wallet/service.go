@@ -3,9 +3,11 @@ package wallet
 import (
 	"errors"
 	"fmt"
+	"io"
 	"log"
 	"os"
 	"strconv"
+	"strings"
 
 	"github.com/Dovar001/wallet/pkg/types"
 	"github.com/google/uuid"
@@ -287,3 +289,75 @@ if err != nil {
 
 return nil
 }
+
+
+func (s *Service) ImportFromFile(path string) error{
+
+	file,err := os.Open(path)
+	if err != nil {
+		log.Print(err)
+		return err
+	}
+
+content := make([] byte,0)
+buf := make([]byte,4)
+
+for{
+
+	read,err := file.Read(buf)
+
+	if err == io.EOF{
+    
+		content=append(content, buf[:read]...)
+		break
+
+	}
+
+	if err != nil {
+		log.Print(err)
+		return err
+	}
+
+	content = append(content, buf[:read]...)
+
+}
+data := string(content)
+
+
+  accounts:=strings.Split(data,"|")
+  accounts = accounts[:len(accounts)-1]
+
+  for _, account := range accounts {
+
+	splits := strings.Split(account, ";")
+
+	id,err := strconv.Atoi(splits[0])
+	if err != nil {
+		log.Print(err)
+		return err
+	}
+
+	phone := splits[1]
+
+	balance,err := strconv.Atoi(splits[2])
+	if err != nil{
+		log.Print(err)
+		return err
+	}  
+
+	  s.accounts=append(s.accounts, &types.Account{
+		  ID: int64(id),
+		  Phone: types.Phone(phone),
+		  Balance: types.Money(balance),
+	  })
+  }
+ return nil
+  
+  }
+
+
+
+
+
+
+
