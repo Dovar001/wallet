@@ -1,6 +1,7 @@
 package wallet
 
 import (
+	
 	"errors"
 	"fmt"
 	"io"
@@ -10,6 +11,7 @@ import (
 	"strings"
 
 	"github.com/Dovar001/wallet/pkg/types"
+
 	"github.com/google/uuid"
 )
 
@@ -469,7 +471,7 @@ if len (s.favorites) > 0 {
 
 func (s *Service)  Import(dir string) error{
 	
-	file,err := os.OpenFile(dir + "/accounts.dump", os.O_WRONLY|os.O_TRUNC, 0666)
+	file,err := os.Open(dir + "/accounts.dump")
 	if err != nil {
 		log.Print(err)
 		return err
@@ -497,6 +499,35 @@ for{
 	content = append(content, buf[:read]...)
 
 }
+ /*src,err:= os.Open(dir + "/accounts.dump") 
+if err != nil {
+	log.Print(err)
+	return err
+}
+defer func ()  {
+			
+	if cerr := src.Close(); cerr!= nil {
+		if err == nil {
+			cerr=err
+		}
+	}
+}()
+
+reader:= bufio.NewReader(src)
+
+for {
+	line,err := reader.ReadString('\n')
+	if err == io.EOF {
+		log.Print(line)
+		break
+	}
+	if err != nil {
+  log.Print(err)
+  return err
+	}
+	accounts:= line
+}*/
+
 data := string(content)
 
 
@@ -527,8 +558,11 @@ data := string(content)
 		  Balance: types.Money(balance),
 	  })
   }
-//Payments============================================================
-  fil,err := os.OpenFile(dir + "/payments.dump", os.O_WRONLY|os.O_TRUNC, 0666)
+ 
+
+
+  //Payments============================================================
+  fil,err := os.Open(dir + "/payments.dump")
   if err != nil {
 	  log.Print(err)
 	  return err
@@ -556,6 +590,7 @@ for{
   cont = append(cont, buff[:read]...)
 
 }
+
 dat := string(cont)
 
 
@@ -595,26 +630,29 @@ for _, payment := range payments {
 
 //Favorites=================================================
 
-files,err :=os.OpenFile(dir + "/favorites.dump", os.O_WRONLY|os.O_TRUNC, 0666)
-
+files,err := os.Open(dir + "/favorites.dump")
 if err != nil {
 	log.Print(err)
 	return err
 }
 
+
 contents := make([] byte ,0)
 buffs := make([]byte , 4)
 
 for {
-read,err := files.Read(buffs)
+
+	read,err := files.Read(buffs)
 
 if err == io.EOF{
 	contents = append(contents, buffs[:read]...)
+	break
 }
 if err != nil{
 	log.Print(err)
 	return err
 }
+
 contents = append(contents, buffs[:read]...)
 
 }
@@ -647,13 +685,10 @@ favorites = favorites[:len(payments)-1]
 		Amount: types.Money(amount),
 		Category: types.PaymentCategory(category),
 		
-	})
-
-	  
+	})	  
   }
- return nil
-  
-  }
+ return nil  
+}
 
 
 
