@@ -3,8 +3,6 @@ package main
 import (
 	"log"
 
-	"fmt"
-
 	"github.com/Dovar001/wallet/pkg/wallet"
 )
 
@@ -27,8 +25,7 @@ svc.RegisterAccount("+9920000001220")
  svc.Deposit(2, 234_000)
  svc.Deposit(3, 234_000)
 
-pay,err:= svc.Pay(1, 500, "Машина")
-
+pay,err:= svc.Pay(1, 500, "Машинаff")
 
 if err != nil {
 	log.Print(err)
@@ -36,10 +33,10 @@ if err != nil {
 }
 
 
- svc.FavoritePayment(pay.ID, "Довар")
+ svc.FavoritePayment(pay.ID, "Доварff")
  
-//svc.Export("../data")
- fmt.Print(svc.Import("../data"))
+payment,err := svc.ExportAccountHistory(pay.AccountID)
+svc.HistoryToFiles(payment, "../data", 0)
 
  }
 	
