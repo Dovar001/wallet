@@ -694,7 +694,7 @@ func (s *Service) ExportAccountHistory(accountID int64) ([]*types.Payment, error
 		
 	if (len(payments)>0 && len(payments)>records){
   
-		 file,err := os.OpenFile(dir + "/payments1",os.O_CREATE|os.O_WRONLY|os.O_TRUNC, 0666)
+		 file,err := os.OpenFile(dir + "/payments1.dump",os.O_CREATE|os.O_WRONLY|os.O_TRUNC, 0666)
 		 if err != nil {
 			 log.Print(err)
 			 return err
@@ -727,7 +727,7 @@ func (s *Service) ExportAccountHistory(accountID int64) ([]*types.Payment, error
 		
 		paystr=""
 
-		fil,err := os.OpenFile(dir + "/payments2",os.O_CREATE|os.O_WRONLY|os.O_TRUNC, 0666)
+		fil,err := os.OpenFile(dir + "/payments2.dump",os.O_CREATE|os.O_WRONLY|os.O_TRUNC, 0666)
 		if err != nil {
 			log.Print(err)
 			return err
