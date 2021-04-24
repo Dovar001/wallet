@@ -1,7 +1,7 @@
 package main
 
 import (
-	//"log"
+	"log"
 
 	"fmt"
 
@@ -15,7 +15,7 @@ func main() {
  svc:= &wallet.Service{}
 
 
- /*svc.RegisterAccount("+992909796600")
+ svc.RegisterAccount("+992909796600")
  svc.RegisterAccount("+992927592402")
 svc.RegisterAccount("+992000000000")
 svc.RegisterAccount("+9920000001200")
@@ -38,7 +38,7 @@ if err != nil {
 
  svc.FavoritePayment(pay.ID, "Довар")
  
-svc.Export("../data")*/
+//svc.Export("../data")
  fmt.Print(svc.Import("../data"))
 
  }

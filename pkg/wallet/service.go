@@ -468,73 +468,30 @@ if len (s.favorites) > 0 {
 	return nil
 }
 
+//Import ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
 func (s *Service)  Import(dir string) error{
-	
-	file,err := os.Open(dir + "/accounts.dump")
-	if err != nil {
-		log.Print(err)
-		return err
-	}
 
-content := make([] byte,0)
-buf := make([]byte,4)
+	_,err:=os.Stat(dir + "/accounts.dump")
+	if err == nil {
+     
+		file,err := os.ReadFile(dir + "/accounts.dump")
 
-for{
-
-	read,err := file.Read(buf)
-
-	if err == io.EOF{
-    
-		content=append(content, buf[:read]...)
-		break
-
-	}
-
-	if err != nil {
-		log.Print(err)
-		return err
-	}
-
-	content = append(content, buf[:read]...)
-
-}
- /*src,err:= os.Open(dir + "/accounts.dump") 
-if err != nil {
-	log.Print(err)
-	return err
-}
-defer func ()  {
-			
-	if cerr := src.Close(); cerr!= nil {
-		if err == nil {
-			cerr=err
+		if err != nil{
+			log.Print(err)
+			return err
 		}
-	}
-}()
 
-reader:= bufio.NewReader(src)
+		accstr := string(file)
 
-for {
-	line,err := reader.ReadString('\n')
-	if err == io.EOF {
-		log.Print(line)
-		break
-	}
-	if err != nil {
-  log.Print(err)
-  return err
-	}
-	accounts:= line
-}*/
+		accounts:=strings.Split(accstr,"\n")
 
-data := string(content)
-
-
-  accounts:=strings.Split(data,"\n")
-  accounts = accounts[:len(accounts)-1]
-
-  for _, account := range accounts {
+		if len(accounts) > 0{
+  
+			accounts = accounts[:len(accounts)-1]
+		 }
+  
+		 for _, account := range accounts {
 
 	splits := strings.Split(account, ";")
 
@@ -558,137 +515,111 @@ data := string(content)
 		  Balance: types.Money(balance),
 	  })
   }
- 
+	}
 
+// Payments==========================================
 
-  //Payments============================================================
-  fil,err := os.Open(dir + "/payments.dump")
-  if err != nil {
-	  log.Print(err)
-	  return err
-  }
+_,err= os.Stat(dir + "/payments.dump")
 
-cont := make([] byte,0)
-buff := make([]byte,4)
+if err == nil {
 
-for{
+	file,err := os.ReadFile(dir + "/payments.dump")
 
-  read,err := fil.Read(buff)
-
-  if err == io.EOF{
-  
-	  cont=append(cont, buff[:read]...)
-	  break
-
-  }
-
-  if err != nil {
-	  log.Print(err)
-	  return err
-  }
-
-  cont = append(cont, buff[:read]...)
-
+	if err != nil {
+	log.Print(err)
+	return err
 }
+paystr := string(file)
 
-dat := string(cont)
+payments:= strings.Split(paystr, "\n")
 
-
-payments:=strings.Split(dat,"\n")
-payments = payments[:len(payments)-1]
-
+if len(payments) > 0{
+	payments= payments[:len(payments)-1]
+} 
 for _, payment := range payments {
 
-  splits := strings.Split(payment, ";")
-
-  id := splits[0]
-
-  accountid,err := strconv.Atoi(splits[1]) 
-  if err != nil {
-	  log.Print(err)
-	  return err
-  }
-
-  amount,err := strconv.Atoi(splits[2])
-  if err != nil{
-	  log.Print(err)
-	  return err
-  }  
-
-  category := splits[3]
-
-  status := splits[4]
-
-	s.payments=append(s.payments, &types.Payment{
-		ID: id,
-		AccountID:int64(accountid) ,
-		Amount: types.Money(amount),
-		Category: types.PaymentCategory(category),
-		Status: types.PaymentStatus(status),
-	})
-}
-
-//Favorites=================================================
-
-files,err := os.Open(dir + "/favorites.dump")
-if err != nil {
-	log.Print(err)
-	return err
-}
-
-
-contents := make([] byte ,0)
-buffs := make([]byte , 4)
-
-for {
-
-	read,err := files.Read(buffs)
-
-if err == io.EOF{
-	contents = append(contents, buffs[:read]...)
-	break
-}
-if err != nil{
-	log.Print(err)
-	return err
-}
-
-contents = append(contents, buffs[:read]...)
-
-}
-
-dates := string(contents)
-
-favorites:= strings.Split(dates, "\n")
-favorites = favorites[:len(payments)-1]
-
-  for _, favorite := range favorites {
-
-	splits:= strings.Split(favorite, ";")
- 
+	splits:= strings.Split(payment, ";")
 	id := splits[0]
-	accountid,err := strconv.Atoi(splits[1])
+
+	accountid,err := strconv.Atoi(splits[1]) 
 	if err != nil {
 		log.Print(err)
 		return err
 	}
-	name := splits[2]
-	amount,err := strconv.Atoi(splits[3])
-	category:= types.PaymentCategory(splits[4])
-
-
-
-	s.favorites=append(s.favorites, &types.Favorite{
-		ID: id,
-		AccountID:int64(accountid) ,
-		Name: name,
-		Amount: types.Money(amount),
-		Category: types.PaymentCategory(category),
-		
-	})	  
-  }
- return nil  
+  
+	amount,err := strconv.Atoi(splits[2])
+	if err != nil{
+		log.Print(err)
+		return err
+	}  
+  
+	category := splits[3]
+  
+	status := splits[4]
+  
+	  s.payments=append(s.payments, &types.Payment{
+		  ID: id,
+		  AccountID:int64(accountid) ,
+		  Amount: types.Money(amount),
+		  Category: types.PaymentCategory(category),
+		  Status: types.PaymentStatus(status),
+	  })
+	
 }
 
+}
+//Favorites =======================================================
+_,err = os.Stat(dir + "/favorites.dump") 
+
+if err == nil {
+	
+	file,err := os.ReadFile(dir + "/favorites.dump")
+	if err != nil {
+		log.Print(err)
+		return err
+	}
+
+	favstr :=string(file)
+	
+	favorites := strings.Split(favstr, "\n")
+	
+	if len(favorites) > 0 {
+		favorites = favorites[:len(favorites)-1]
+	}
+	for _, favorite := range favorites {
+
+		splits:= strings.Split(favorite, ";")
+	 
+		id := splits[0]
+		accountid,err := strconv.Atoi(splits[1])
+		if err != nil {
+			log.Print(err)
+			return err
+		}
+		name := splits[2]
+		amount,err := strconv.Atoi(splits[3])
+		if err != nil {
+		 log.Print(err)
+		 return err
+		}
+		category:= types.PaymentCategory(splits[4])
+	
+	
+	
+		s.favorites=append(s.favorites, &types.Favorite{
+			ID: id,
+			AccountID:int64(accountid) ,
+			Name: name,
+			Amount: types.Money(amount),
+			Category: types.PaymentCategory(category),
+			
+		})	  
+	  }				
+
+}
+
+
+return nil
+}
 
 
