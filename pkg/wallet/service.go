@@ -659,7 +659,7 @@ func (s *Service) ExportAccountHistory(accountID int64) ([]*types.Payment, error
 
  func (s *Service) HistoryToFiles(payments []*types.Payment, dir string, records int) error{
 
-	if (len(payments)>0 && len(payments)<=records) {
+	if (len(payments)>0 && len(payments)==records) {
 		file,err := os.OpenFile(dir + "/payments.dump", os.O_CREATE|os.O_WRONLY|os.O_TRUNC, 0666)
 	
 		if err != nil {
@@ -692,7 +692,7 @@ func (s *Service) ExportAccountHistory(accountID int64) ([]*types.Payment, error
 		file.WriteString(paystr)
 	}
 		
-	if (len(payments)>0 && len(payments)>records){
+	if len(payments)>0 {
   
 		 file,err := os.OpenFile(dir + "/payments1.dump",os.O_CREATE|os.O_WRONLY|os.O_TRUNC, 0666)
 		 if err != nil {
@@ -741,7 +741,7 @@ func (s *Service) ExportAccountHistory(accountID int64) ([]*types.Payment, error
 		   }
 	   }()
 
-	   for i := 0; i < len(payments)-records; i++{
+	   for i := records; i < records+records; i++{
 		   
 			 paystr+=string(payments[i].ID) + ";"
 	
