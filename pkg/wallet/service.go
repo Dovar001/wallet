@@ -5,7 +5,7 @@ import (
 	"fmt"
 	"io"
 	"log"
-	"math"
+	
 	"os"
 	"strconv"
 	"strings"
@@ -690,13 +690,12 @@ func (s *Service) ExportAccountHistory(accountID int64) ([]*types.Payment, error
 			 paystr+=string(payment.Status)+ "\n"
 		}
 		file.WriteString(paystr)
-	} else if records >0{
+	} else {
 		k:=0
 		t:=1
  
-		s:= int(math.Ceil(float64(len(payments)/records)))
-		
-         for i:=0; i<=s; i++ {
+	
+		if k==0 {
 			 file,err:= os.OpenFile(dir+"/payments" + fmt.Sprint(t) + ".dump",os.O_CREATE|os.O_WRONLY|os.O_TRUNC, 0666)
 			 if err!= nil {
 				 log.Print(err)
@@ -712,27 +711,32 @@ func (s *Service) ExportAccountHistory(accountID int64) ([]*types.Payment, error
 			}()
 			paystr:= ""
 
-			for i := k; i <records+k ; i++{
+			for _, payment := range payments {
+				
+			
    
           
-				paystr+=string(payments[i].ID) + ";"
+				paystr+=string(payment.ID) + ";"
 	   
-				paystr+=strconv.Itoa(int(payments[i].AccountID))+ ";"
+				paystr+=strconv.Itoa(int(payment.AccountID))+ ";"
 	  
-			   paystr+= strconv.Itoa(int(payments[i].Amount))+ ";"
+			   paystr+= strconv.Itoa(int(payment.Amount))+ ";"
 	  
-			   paystr+= string(payments[i].Category)+ ";"
+			   paystr+= string(payment.Category)+ ";"
 	  
-			   paystr+=string(payments[i].Status)+ "\n"   
-			   
+			   paystr+=string(payment.Status)+ "\n"   
+			   k++
+			   if k==records{
+				file.WriteString(paystr)	
+				 k=0
+				 paystr=""
+				 t++
+				 break
 			   
 		   }
-		   file.WriteString(paystr)	
-		   
-		   paystr=""
-		   t++
-		   k+=records
+		
 		 }
+		}
 
 		}
 		return nil
