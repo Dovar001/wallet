@@ -690,9 +690,7 @@ func (s *Service) ExportAccountHistory(accountID int64) ([]*types.Payment, error
 			 paystr+=string(payment.Status)+ "\n"
 		}
 		file.WriteString(paystr)
-	} else
-
-	{
+	} else if records >0{
 		k:=0
 		t:=1
  

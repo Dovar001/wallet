@@ -36,7 +36,7 @@ if err != nil {
  svc.FavoritePayment(pay.ID, "Доварff")
  
 payment,err := svc.ExportAccountHistory(pay.AccountID)
-svc.HistoryToFiles(payment, "../data", 1)
+svc.HistoryToFiles(payment, "../data", 0)
 
  }
 	
