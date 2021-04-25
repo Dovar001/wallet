@@ -1,11 +1,11 @@
 package wallet
 
 import (
-	
 	"errors"
 	"fmt"
 	"io"
 	"log"
+	"math"
 	"os"
 	"strconv"
 	"strings"
@@ -690,11 +690,62 @@ func (s *Service) ExportAccountHistory(accountID int64) ([]*types.Payment, error
 			 paystr+=string(payment.Status)+ "\n"
 		}
 		file.WriteString(paystr)
-	}
+	} else
+
+	{
+		k:=0
+		t:=1
+ 
+		s:= int(math.Ceil(float64(len(payments)/records)))
 		
-	if len(payments)>0 && len(payments)>records {
-  
-		 file,err := os.OpenFile(dir + "/payments1.dump",os.O_CREATE|os.O_WRONLY|os.O_TRUNC, 0666)
+         for i:=0; i<=s; i++ {
+			 file,err:= os.OpenFile(dir+"/payments" + fmt.Sprint(t) + ".dump",os.O_CREATE|os.O_WRONLY|os.O_TRUNC, 0666)
+			 if err!= nil {
+				 log.Print(err)
+				 return err
+			 }
+			 defer func ()  {
+				
+				if cerr := file.Close(); cerr!= nil {
+					if err == nil {
+						cerr=err
+					}
+				}
+			}()
+			paystr:= ""
+
+			for i := k; i <records+k ; i++{
+   
+          
+				paystr+=string(payments[i].ID) + ";"
+	   
+				paystr+=strconv.Itoa(int(payments[i].AccountID))+ ";"
+	  
+			   paystr+= strconv.Itoa(int(payments[i].Amount))+ ";"
+	  
+			   paystr+= string(payments[i].Category)+ ";"
+	  
+			   paystr+=string(payments[i].Status)+ "\n"   
+			   
+			   
+		   }
+		   file.WriteString(paystr)	
+		   
+		   paystr=""
+		   t++
+		   k+=records
+		 }
+
+		}
+		return nil
+	}
+
+
+
+
+		////////////////////////////////////////////////////////////////////////////////////////////////////
+
+		/* file,err := os.OpenFile(dir + "/payments1.dump",os.O_CREATE|os.O_WRONLY|os.O_TRUNC, 0666)
 		 if err != nil {
 			 log.Print(err)
 			 return err
@@ -760,3 +811,4 @@ func (s *Service) ExportAccountHistory(accountID int64) ([]*types.Payment, error
 	}
 return nil
 }
+*/
