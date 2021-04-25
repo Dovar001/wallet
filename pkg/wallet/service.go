@@ -693,29 +693,13 @@ func (s *Service) ExportAccountHistory(accountID int64) ([]*types.Payment, error
 	} else {
 		k:=0
 		t:=1
- 
-	
 		if k==0 {
-			 file,err:= os.OpenFile(dir+"/payments" + fmt.Sprint(t) + ".dump",os.O_CREATE|os.O_WRONLY|os.O_TRUNC, 0666)
-			 if err!= nil {
-				 log.Print(err)
-				 return err
-			 }
-			 defer func ()  {
-				
-				if cerr := file.Close(); cerr!= nil {
-					if err == nil {
-						cerr=err
-					}
-				}
-			}()
 			paystr:= ""
 
 			for _, payment := range payments {
 				
-			
-   
-          
+		
+		
 				paystr+=string(payment.ID) + ";"
 	   
 				paystr+=strconv.Itoa(int(payment.AccountID))+ ";"
@@ -726,12 +710,19 @@ func (s *Service) ExportAccountHistory(accountID int64) ([]*types.Payment, error
 	  
 			   paystr+=string(payment.Status)+ "\n"   
 			   k++
+
 			   if k==records{
-				file.WriteString(paystr)	
+				file,err:= os.OpenFile(dir+"/payments" + fmt.Sprint(t) + ".dump",os.O_CREATE|os.O_WRONLY|os.O_TRUNC, 0666)
+				if err!= nil {
+					log.Print(err)
+					return err
+				}
+				
+				file.WriteString(paystr)
+				file.Close()	
 				 k=0
 				 paystr=""
 				 t++
-				 break
 			   
 		   }
 		
@@ -745,72 +736,4 @@ func (s *Service) ExportAccountHistory(accountID int64) ([]*types.Payment, error
 
 
 
-		////////////////////////////////////////////////////////////////////////////////////////////////////
-
-		/* file,err := os.OpenFile(dir + "/payments1.dump",os.O_CREATE|os.O_WRONLY|os.O_TRUNC, 0666)
-		 if err != nil {
-			 log.Print(err)
-			 return err
-		 }
-		 defer func ()  {
-				
-			if cerr := file.Close(); cerr!= nil {
-				if err == nil {
-					cerr=err
-				}
-			}
-		}()
-		 
-     paystr:= ""
 		
-	 if records < len(payments){
-	 for i := 0; i <records ; i++{
-   
-          
-			 paystr+=string(payments[i].ID) + ";"
-	
-			 paystr+=strconv.Itoa(int(payments[i].AccountID))+ ";"
-   
-			paystr+= strconv.Itoa(int(payments[i].Amount))+ ";"
-   
-			paystr+= string(payments[i].Category)+ ";"
-   
-			paystr+=string(payments[i].Status)+ "\n"    
-		}
-		file.WriteString(paystr)	
-		
-		paystr=""
-
-		fil,err := os.OpenFile(dir + "/payments2.dump",os.O_CREATE|os.O_WRONLY|os.O_TRUNC, 0666)
-		if err != nil {
-			log.Print(err)
-			return err
-		}
-		defer func ()  {
-			   
-		   if cerr := fil.Close(); cerr!= nil {
-			   if err == nil {
-				   cerr=err
-			   }
-		   }
-	   }()
-
-	   for i := records; i < len(payments); i++{
-		   
-			 paystr+=string(payments[i].ID) + ";"
-	
-			 paystr+=strconv.Itoa(int(payments[i].AccountID))+ ";"
-   
-			paystr+= strconv.Itoa(int(payments[i].Amount))+ ";"
-   
-			paystr+= string(payments[i].Category)+ ";"
-   
-			paystr+=string(payments[i].Status)+ "\n"    
-		}
-		file.WriteString(paystr)	
-
-	   }
-	}
-return nil
-}
-*/
