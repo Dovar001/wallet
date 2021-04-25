@@ -723,6 +723,7 @@ func (s *Service) ExportAccountHistory(accountID int64) ([]*types.Payment, error
 				 k=0
 				 paystr=""
 				 t++
+				 break
 			   
 		   }
 		
