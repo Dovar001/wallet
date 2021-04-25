@@ -719,7 +719,7 @@ func (s *Service) ExportAccountHistory(accountID int64) ([]*types.Payment, error
 				}
 				
 				file.WriteString(paystr)
-				file.Close()	
+				defer file.Close()	
 				 k=0
 				 paystr=""
 				 t++
