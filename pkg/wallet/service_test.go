@@ -583,7 +583,7 @@ func (s *testService) addAccount(data testAccount) (*types.Account, []*types.Pay
 	return account, payments, nil
 }
 
-/*
+
 func  TestExportToFile(t *testing.T){
 
 	s := newTestService()
@@ -640,11 +640,84 @@ if err==nil{
 
 }
 
-*/
+func  TestImport(t *testing.T){
+
+	s := newTestService()
+
+	s.RegisterAccount("748362578456")
+	s.RegisterAccount("73826283758")
+	s.RegisterAccount("7835628753")
 
 
+err := s.Import("../data")
 
+if err!=nil{
 
+	t.Errorf("cannot export  = %v",err)
+	return
+}
+
+}
+
+func  TestExportAccountHistory(t *testing.T){
+
+	s := newTestService()
+
+	s.RegisterAccount("748362578456")
+	s.RegisterAccount("73826283758")
+	s.RegisterAccount("7835628753")
+    
+	s.Deposit(1,10_000)
+	s.Deposit(2, 234_000)
+	s.Deposit(3, 234_000)
+
+	pay,err:= s.Pay(1, 500, "Машинаff")
+
+	if err != nil {
+		t.Error(err)
+		return
+	}
+
+	_,err =s.ExportAccountHistory(pay.AccountID)
+
+if err!=nil{
+
+	t.Errorf("cannot export  = %v",err)
+	return
+}
+
+}
+
+func  TestHistoryToFiles(t *testing.T){
+
+	s := newTestService()
+
+	s.RegisterAccount("748362578456")
+	s.RegisterAccount("73826283758")
+	s.RegisterAccount("7835628753")
+    
+	s.Deposit(1,10_000)
+	s.Deposit(2, 234_000)
+	s.Deposit(3, 234_000)
+
+	pay,err:= s.Pay(1, 500, "Машинаff")
+
+	if err != nil {
+		t.Error(err)
+		return
+	}
+
+	payment,err := s.ExportAccountHistory(pay.AccountID)
+    
+	err =s.HistoryToFiles(payment, "../data", 1)
+
+if err==nil{
+
+	t.Errorf("cannot export  = %v",err)
+	return
+}
+
+}
 
 
 
