@@ -649,6 +649,73 @@ if err!=nil{
 }
 
 }
+func TestExport(t *testing.T) {
+	s := newTestService()
+	_, payments, err := s.addAccount(defaultTestAccount)
+	if err != nil {
+	  t.Error(err)
+	  return
+	}
+  
+	payment := payments[0]
+	_, err = s.FavoritePayment(payment.ID, "new")
+	if err != nil {
+	  t.Errorf("FavoritePayment(): error = %v", err)
+	  return
+	}
+  
+	err = s.Export("../data")
+  
+	if err == nil {
+	  t.Error(err)
+	}
+  }
+  
+  func TestImport(t *testing.T) {
+	s := newTestService()
+	account, payments, err := s.addAccount(defaultTestAccount)
+	if err != nil {
+	  t.Error(err)
+	  return
+	}
+  
+	payment := payments[0]
+	_, err = s.FavoritePayment(payment.ID, "new")
+	if err != nil {
+	  t.Errorf("FavoritePayment(): error = %v", err)
+	  return
+	}
+  
+	_ = s.Export("data")
+  
+	err = s.Import("data")
+  
+	if !reflect.DeepEqual(account, s.accounts[0]) {
+	  t.Errorf(("ImportF(): wrong account returned = %v"), err)
+	  return
+	}
+  }
+  
+  func TestHistoryToFiles(t *testing.T) {
+	s := newTestService()
+	account, _, err := s.addAccount(defaultTestAccount)
+	if err != nil {
+	  t.Error(err)
+	  return
+	}
+	for i := 0; i < 9; i++ {
+	  _, err := s.Pay(account.ID, 1_000_00, "mobile")
+	  if err != nil {
+		t.Errorf(("Pay(): wrong = %v"), err)
+	  }
+	}
+	payments, err := s.ExportAccountHistory(account.ID)
+	if err != nil {
+	  t.Errorf(("ExportAccountHistory(): wrong = %v"), err)
+	}
+  
+	err = s.HistoryToFiles(payments, "data", 9)
+  }
 
 func BenchmarkSumPayments(b *testing.B) {
 	
