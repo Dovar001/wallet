@@ -622,7 +622,79 @@ if err == nil {
 return nil
 }
 
+func (s *Service) ExportAccountHistory(accountID int64) ([]types.Payment, error) {
+	_, err := s.FindAccountByID(accountID)
+	if err != nil {
+		return nil, err
+	}
+	payments := make([]types.Payment, 0)
+	for _, payment := range s.payments {
+		if payment.AccountID == accountID {
+			payments = append(payments, *payment)
+		}
+	}
+	return payments, nil
+}
 
+func (s *Service) HistoryToFiles(payments []types.Payment, dir string, records int) error {
+	var file *os.File
+	var err error
+	if len(payments) == 0 {
+		return nil
+	}
+	if len(payments) <= records {
+		file, err = os.Create(dir + "/payments.dump")
+		if err != nil {
+			return err
+		}
+	} else {
+		file, err = os.Create(dir + "/payments1.dump")
+		if err != nil {
+			return err
+		}
+	}
+	x := 1
+	i := 1
+	for _, payment := range payments {
+		log.Println(strconv.Itoa(i) + " " + strconv.Itoa(x) + " " + strconv.Itoa(records))
+		if i%records == 1 && i != 1 {
+			x++
+			file, err = os.Create(dir + "/payments" + strconv.Itoa(x) + ".dump")
+			if err != nil {
+				return err
+			}
+		}
+		_, err := file.Write([]byte(payment.ID + ";"))
+		if err != nil {
+			log.Print(err)
+			return err
+		}
+		_, err = file.Write([]byte(strconv.FormatInt(payment.AccountID, 10) + ";"))
+		if err != nil {
+			log.Print(err)
+			return err
+		}
+		_, err = file.Write([]byte(strconv.FormatInt(int64(payment.Amount), 10) + ";"))
+		if err != nil {
+			log.Print(err)
+			return err
+		}
+		_, err = file.Write([]byte(payment.Category + ";"))
+		if err != nil {
+			log.Print(err)
+			return err
+		}
+		_, err = file.Write([]byte(payment.Status + "\n"))
+		if err != nil {
+			log.Print(err)
+			return err
+		}
+		i++
+	}
+	return nil
+}
+
+/*
 func (s *Service) ExportAccountHistory(accountID int64) ([]*types.Payment, error){
 
 	var account  *types.Account
@@ -709,30 +781,30 @@ func (s *Service) ExportAccountHistory(accountID int64) ([]*types.Payment, error
 			   paystr+= string(payment.Category)+ ";"
 	  
 			   paystr+=string(payment.Status)+ "\n"   
+			   
 			   k++
 
 			   if k==records{
-				file,err:= os.OpenFile(dir+"/payments" + fmt.Sprint(t) + ".dump",os.O_CREATE|os.O_WRONLY|os.O_TRUNC, 0666)
+				file,err:= os.OpenFile(dir+ "/payments" + fmt.Sprint(t) + ".dump",os.O_CREATE|os.O_WRONLY|os.O_TRUNC, 0666)
 				if err!= nil {
 					log.Print(err)
 					return err
 				}
 				
 				file.WriteString(paystr)
-				defer file.Close()	
+				 file.Close()	
 				 k=0
 				 paystr=""
 				 t++
-				 break
 			   
-		   }
-		
-		 }
-		}
-
-		}
-		return nil
+		  }
+	   }
 	}
+
+  }
+  		return nil
+}
+*/
 
 
 
