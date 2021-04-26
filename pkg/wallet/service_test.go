@@ -583,6 +583,7 @@ func (s *testService) addAccount(data testAccount) (*types.Account, []*types.Pay
 	return account, payments, nil
 }
 
+/*
 func  TestExportToFile(t *testing.T){
 
 	s := newTestService()
@@ -639,7 +640,7 @@ if err==nil{
 
 }
 
-
+*/
 
 
 
