@@ -88,7 +88,6 @@ if !reflect.DeepEqual(expect,result){
 	t.Errorf("invalid result, expected: %v, actual:%v", expect , result)
 }
 
-
 }
 
 
@@ -417,7 +416,6 @@ func TestService_Deposit_succes(t *testing.T){
 		t.Errorf("can not deposit account, error = %v", err)
 		return
 	}
-	
 	}
 
 
@@ -438,8 +436,7 @@ func TestService_Deposit_succes(t *testing.T){
 			return
 
 		}
-
-	}
+}
 
 func TestFavoritePayment_success(t *testing.T){
 
@@ -587,6 +584,49 @@ func (s *testService) addAccount(data testAccount) (*types.Account, []*types.Pay
 }
 
 
+func BenchmarkSumPayments(b *testing.B) {
+	
+	s:=Service{}
 
+	account,err:=s.RegisterAccount("909796600")
+	if err!= nil{
+		b.Error(err)
+	}
+	
+	err =s.Deposit(account.ID, 10_000_00)
+	err= s.Deposit(account.ID, 20_000_00)
+	err= s.Deposit(account.ID, 30_000_00)
+	
+	if err != nil {
+		b.Errorf("can not deposit account, error = %v", err)
+		return
+	}
+	//осуществляем платёж на его счёт
+	
+	_, err = s.Pay(account.ID, 1000_00, "auto")
+	if err != nil {
+		b.Errorf(" can not creat payment, error = %v", err)
+		return
+	}
+	_, err = s.Pay(account.ID, 2000_00, "auto")
+	if err != nil {
+		b.Errorf(" can not creat payment, error = %v", err)
+		return
+	}
+	_, err = s.Pay(account.ID, 3000_00, "auto")
+	if err != nil {
+		b.Errorf(" can not creat payment, error = %v", err)
+		return
+	}
+	want:=types.Money(6000_00)
+
+	for i := 0; i < b.N; i++ {
+		result:=s.SumPayments(10)
+		if result!=want {
+			b.Fatalf("invalid result, got %v, want %v", result, want)
+		}
+	}
+	
+}
 
 	

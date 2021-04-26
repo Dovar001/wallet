@@ -3,12 +3,14 @@ package wallet
 import (
 	"errors"
 	"fmt"
-	"io"
-	"log"
+	//"io"
+	//"log"
 	
-	"os"
-	"strconv"
-	"strings"
+	"sync"
+
+	//"os"
+	////"strconv"
+	//"strings"
 
 	"github.com/Dovar001/wallet/pkg/types"
 
@@ -252,7 +254,7 @@ func (s *Service) FindFavoriteByID(favoriteID string) (*types.Favorite, error) {
 	}
 	return favorite,nil
 }
-
+/*
 func (s *Service) ExportToFile(path string) error{
 
  str:=""
@@ -693,119 +695,83 @@ func (s *Service) HistoryToFiles(payments []types.Payment, dir string, records i
 	}
 	return nil
 }
+*/
+func (s *Service) SumPayments(goroutines int) types.Money{
 
-/*
-func (s *Service) ExportAccountHistory(accountID int64) ([]*types.Payment, error){
+	wg := sync.WaitGroup{}
+	mu:=sync.Mutex{}
+	sum:=types.Money(0)
 
-	var account  *types.Account
-	var paymentsss [] *types.Payment
+	if goroutines <2 {
+	wg.Add(1)
+	go func() {
+       
+		defer wg.Done()
+		val:= types.Money(0)
 
-	for _, acc := range s.accounts {
-		
-		if ( accountID == acc.ID){
-            account= acc
-			break
+		for _, payment := range s.payments {
+			
+			val+=payment.Amount
 		}
-		
-	}
-	if account == nil {
-		return nil , ErrAccountNotFound
-	}
+		mu.Lock()
+		defer mu.Unlock()
+		sum+=val
 
-	for _, payment := range s.payments {
-  
-  if (payment.AccountID == account.ID){
- 
-	paymentsss=append(paymentsss, payment)
-  } 
-		
-	}
+	}()
+	wg.Wait()
+	 }  else{
+   
+   wg:=sync.WaitGroup{}
 
-	if paymentsss == nil {
-		return nil, ErrPaymentNotFound
-	}
+   mu:= sync.Mutex{}
 
-	return paymentsss,nil
+   sum:=types.Money(0)
+   
+   kol:= int(len(s.payments)/goroutines) 
+     
+     i:=0
+   for i = 0; i < goroutines-1; i++ {
 
-} 
+	wg.Add(1)
+	go func (index int){
 
- func (s *Service) HistoryToFiles(payments []*types.Payment, dir string, records int) error{
+		defer wg.Done()
+        val:=types.Money(0)
+	 
+		payments:=s.payments[index*kol : (index+1)*kol]
 
-	if (len(payments)>0 && len(payments)<=records) {
-		file,err := os.OpenFile(dir + "/payments.dump", os.O_CREATE|os.O_WRONLY|os.O_TRUNC, 0666)
-	
-		if err != nil {
-			log.Print(err)
-			return err
-		}
-		defer func ()  {
-				
-			if cerr := file.Close(); cerr!= nil {
-				if err == nil {
-					cerr=err
-				}
-			}
-		}()
-		
-		paystr:=""
 
 		for _, payment := range payments {
-	
-			 paystr+=string(payment.ID) + ";"
-	
-			  paystr+=strconv.Itoa(int(payment.AccountID))+ ";"
-	
-			 paystr+= strconv.Itoa(int(payment.Amount))+ ";"
-	
-			 paystr+= string(payment.Category)+ ";"
-	
-			 paystr+=string(payment.Status)+ "\n"
+			
+			val+=payment.Amount
 		}
-		file.WriteString(paystr)
-	} else {
-		k:=0
-		t:=1
-		if k==0 {
-			paystr:= ""
+		mu.Lock()
+		defer mu.Unlock()
+		sum+=val
 
-			for _, payment := range payments {
-				
-		
-		
-				paystr+=string(payment.ID) + ";"
-	   
-				paystr+=strconv.Itoa(int(payment.AccountID))+ ";"
-	  
-			   paystr+= strconv.Itoa(int(payment.Amount))+ ";"
-	  
-			   paystr+= string(payment.Category)+ ";"
-	  
-			   paystr+=string(payment.Status)+ "\n"   
-			   
-			   k++
-
-			   if k==records{
-				file,err:= os.OpenFile(dir+ "/payments" + fmt.Sprint(t) + ".dump",os.O_CREATE|os.O_WRONLY|os.O_TRUNC, 0666)
-				if err!= nil {
-					log.Print(err)
-					return err
-				}
-				
-				file.WriteString(paystr)
-				 file.Close()	
-				 k=0
-				 paystr=""
-				 t++
-			   
-		  }
-	   }
+	}(i)
 	}
+   
+	wg.Add(1)
 
-  }
-  		return nil
+	go func (){
+     defer wg.Done()
+	 val:=types.Money(0)
+	 payments:= s.payments[i*kol:]
+	 for _, payments := range payments  {
+        
+		val+=payments.Amount
+	 }
+	 mu.Lock()
+	 defer mu.Unlock()
+	 sum+=val
+
+ 	}()
+ wg.Wait()
+ return sum
 }
-*/
-
+return sum
+}
 
 
 
