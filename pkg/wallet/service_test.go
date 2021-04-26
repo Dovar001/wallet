@@ -554,6 +554,72 @@ if reflect.DeepEqual(payfromfav,findfav){
 
 }
 
+func TestFindFavoriteByID(t *testing.T){
+	s := newTestService()
+
+//Регистрируем там пользователья 
+phone := types.Phone("+992000000001")
+account, err := s.RegisterAccount(phone)
+
+if err != nil {
+ t.Errorf(" can not register account, errror = %v", err)
+return
+}
+//пополняем его счёт 
+
+err = s.Deposit(account.ID, 10_000_00)
+
+if err != nil {
+	t.Errorf("can not deposit account, error = %v", err)
+	return
+}
+//осуществляем платёж на его счёт
+
+payment, err := s.Pay(account.ID, 1000_00, "auto")
+
+if err != nil {
+	t.Errorf(" can not creat payment, error = %v", err)
+	return
+}
+
+pay,err:= s.FindPaymentByID(payment.ID)
+
+if err != nil {
+	t.Errorf("can not find payment =%v", err)
+	return
+}
+
+fav,err := s.FavoritePayment(pay.ID, "Довар")
+
+if err != nil {
+	t.Errorf("favorite can not found= %v", err)
+	return
+}
+findfav,err:= s.FindFavoriteByID(fav.ID)
+
+if err != nil {
+	t.Errorf("can not find payment =%v", err)
+	return
+}
+
+if !reflect.DeepEqual(findfav,fav){
+	t.Errorf("can not pay from favorite = %v",err)
+	return
+}
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
 func (s *testService) addAccount(data testAccount) (*types.Account, []*types.Payment, error){
 
 	//Регистрируем там пользователья
