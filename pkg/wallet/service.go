@@ -3,14 +3,14 @@ package wallet
 import (
 	"errors"
 	"fmt"
-	//"io"
-	//"log"
+	"io"
+	"log"
 	
 	"sync"
 
-	//"os"
-	////"strconv"
-	//"strings"
+	"os"
+    "strconv"
+	"strings"
 
 	"github.com/Dovar001/wallet/pkg/types"
 
@@ -254,7 +254,7 @@ func (s *Service) FindFavoriteByID(favoriteID string) (*types.Favorite, error) {
 	}
 	return favorite,nil
 }
-/*
+
 func (s *Service) ExportToFile(path string) error{
 
  str:=""
@@ -695,7 +695,7 @@ func (s *Service) HistoryToFiles(payments []types.Payment, dir string, records i
 	}
 	return nil
 }
-*/
+
 func (s *Service) SumPayments(goroutines int) types.Money{
 
 	wg := sync.WaitGroup{}

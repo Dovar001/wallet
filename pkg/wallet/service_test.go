@@ -583,6 +583,75 @@ func (s *testService) addAccount(data testAccount) (*types.Account, []*types.Pay
 	return account, payments, nil
 }
 
+func  TestExportToFile(t *testing.T){
+
+	s := newTestService()
+
+	s.RegisterAccount("748362578456")
+	s.RegisterAccount("73826283758")
+	s.RegisterAccount("7835628753")
+
+err:=s.ExportToFile("../data/export.txt")
+
+if err==nil{
+
+	t.Errorf("cannot export  = %v",err)
+	return
+}
+
+}
+
+func  TestImportFromFile(t *testing.T){
+
+	s := newTestService()
+
+	s.RegisterAccount("748362578456")
+	s.RegisterAccount("73826283758")
+	s.RegisterAccount("7835628753")
+
+
+err := s.ImportFromFile("../data/export.txt")
+
+if err==nil{
+
+	t.Errorf("cannot export  = %v",err)
+	return
+}
+
+}
+
+func  TestExport(t *testing.T){
+
+	s := newTestService()
+
+	s.RegisterAccount("748362578456")
+	s.RegisterAccount("73826283758")
+	s.RegisterAccount("7835628753")
+
+
+err := s.Export("../data")
+
+if err==nil{
+
+	t.Errorf("cannot export  = %v",err)
+	return
+}
+
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 func BenchmarkSumPayments(b *testing.B) {
 	
