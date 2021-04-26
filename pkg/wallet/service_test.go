@@ -607,19 +607,6 @@ if !reflect.DeepEqual(findfav,fav){
 	return
 }
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
 func (s *testService) addAccount(data testAccount) (*types.Account, []*types.Payment, error){
 
 	//Регистрируем там пользователья
