@@ -860,9 +860,45 @@ func (s *Service) FilterPayments(accountID int64, goroutines int) ([]types.Payme
 		accpayments=append(accpayments, val...)
 
 	}(i)
+}
+	wg.Wait()
+
+	go func (){
+		defer wg.Done()
+		var val []types.Payment
+
+		var pay []types.Payment
+		for _, payment := range s.payments {
+			if  account.ID == accountID{
+			
+				pay=append(pay,*payment)
+	
+			}	
+		}
+		
+		payments:=pay[i*kol:]
+
+
+		for _, payment := range payments {
+
+				val=append(val,types.Payment{
+					
+					ID: payment.ID,
+					AccountID: payment.AccountID,
+					Amount: payment.Amount,
+					Category:payment.Category,
+					Status: payment.Status,
+				})	
+			
+		}
+
+mu.Lock()
+defer mu.Unlock()
+accpayments=append(accpayments, val...)
+
+}()
 wg.Wait()
-return accpayments,nil
-	}
+	return accpayments,nil
 	}
 return accpayments,nil
 }
