@@ -969,7 +969,7 @@ func TestService_FavoritePayment_success(t *testing.T) {
 
 }
 
-func TestSumPayments(t *testing.T) {
+func Test(t *testing.T) {
 	
 	s:=Service{}
 
@@ -1015,3 +1015,48 @@ func TestSumPayments(t *testing.T) {
 		}
 	
 	
+		func TestFilterPayments(t *testing.T) {
+	
+			s:=Service{}
+		
+			account,err:=s.RegisterAccount("909796600")
+			if err!= nil{
+				t.Error(err)
+			}
+			
+			err =s.Deposit(account.ID, 10_000_00)
+			err= s.Deposit(account.ID, 20_000_00)
+			err= s.Deposit(account.ID, 30_000_00)
+			
+			if err != nil {
+				t.Errorf("can not deposit account, error = %v", err)
+				return
+			}
+			//осуществляем платёж на его счёт
+			
+			_, err = s.Pay(account.ID, 1000_00, "auto")
+			if err != nil {
+				t.Errorf(" can not creat payment, error = %v", err)
+				return
+			}
+			_, err = s.Pay(account.ID, 2000_00, "auto")
+			if err != nil {
+				t.Errorf(" can not creat payment, error = %v", err)
+				return
+			}
+			_, err = s.Pay(account.ID, 3000_00, "auto")
+			if err != nil {
+				t.Errorf(" can not creat payment, error = %v", err)
+				return
+			}
+			want:=types.Payment{}
+		
+			acc,err:=s.FindAccountByID(1111)
+ 
+
+
+				if reflect.DeepEqual(acc,want){
+					t.Errorf(" can not creat payment, error = %v", err)
+					return	
+				}
+				}
