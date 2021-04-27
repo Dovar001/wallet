@@ -1014,7 +1014,7 @@ func Test(t *testing.T) {
 		}
 		}
 	
-	
+	/*
 		func TestFilterPayments(t *testing.T) {
 	
 			s:=Service{}
@@ -1051,12 +1051,49 @@ func Test(t *testing.T) {
 			}
 			want:=types.Payment{}
 		
-			acc,err:=s.FindAccountByID(1111)
- 
+			acc,err:=s.FindAccountByID(account.ID)
+		
+           filter,err:=s.FilterPayments(acc.ID,3)
+		   if err!=nil {
+			   t.Error(err)
+		   }
 
 
-				if reflect.DeepEqual(acc,want){
+				if reflect.DeepEqual(filter,want){
 					t.Errorf(" can not creat payment, error = %v", err)
 					return	
 				}
 				}
+				*/
+		
+				func TestService_ExportToFile_success(t *testing.T) {
+					svc := Service{}
+				  
+					acc, err := svc.RegisterAccount("+992000000001")
+				  
+					if err != nil {
+					  t.Errorf("method RegisterAccount returned not nil error, account => %v", acc)
+					}
+				  
+					err = svc.Deposit(acc.ID, 100_00)
+					if err != nil {
+					  t.Errorf("method Deposit returned not nil error, error => %v", err)
+					}
+				  
+					_, err = svc.Pay(acc.ID, 1, "Cafe")
+					payN, err := svc.Pay(acc.ID, 2, "Auto")
+					_, err = svc.Pay(acc.ID, 3, "MarketShop")
+					if err != nil {
+					  t.Errorf("method Pay returned not nil error, err => %v", err)
+					}
+				  
+					_, err = svc.FavoritePayment(payN.ID, "love")
+					if err != nil {
+					  t.Errorf("method Pay returned not nil error, err => %v", err)
+					}
+					
+					err = svc.ExportToFile("../../data/payments.dump")
+					if err != nil {
+					  t.Errorf("method Export returned not nil error, err => %v", err)
+					}
+				  }
