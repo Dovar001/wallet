@@ -5,8 +5,8 @@ import (
 	"testing"
 
 	"github.com/Dovar001/wallet/pkg/types"
-	
-
+	"github.com/google/uuid" 
+    
 	"reflect"
 )
 type testService struct{
@@ -815,4 +815,203 @@ func BenchmarkSumPayments(b *testing.B) {
 	
 }
 
+	
+func TestService_ExportHistory_success_user(t *testing.T) {
+  svc := Service{}
+
+  acc, err := svc.RegisterAccount("+992000000001")
+
+  if err != nil {
+    t.Errorf("method RegisterAccount returned not nil error, account => %v", acc)
+  }
+
+  err = svc.Deposit(acc.ID, 100_00)
+  if err != nil {
+    t.Errorf("method Deposit returned not nil error, error => %v", err)
+  }
+
+  _, err = svc.Pay(acc.ID, 1, "Cafe")
+  _, err = svc.Pay(acc.ID, 2, "Auto")
+  _, err = svc.Pay(acc.ID, 3, "MarketShop")
+  if err != nil {
+    t.Errorf("method Pay returned not nil error, err => %v", err)
+  }
+
+  payments, err := svc.ExportAccountHistory(acc.ID)
+  if err != nil {
+    t.Errorf("method ExportAccountHistory returned not nil error, err => %v", err)
+  }
+
+  err = svc.HistoryToFiles(payments, "../../data", 2)
+  if err != nil {
+    t.Errorf("method HistoryToFiles returned not nil error, err => %v", err)
+  }
+}
+
+func TestService_Export_success(t *testing.T) {
+  svc := Service{}
+
+  acc, err := svc.RegisterAccount("+992000000001")
+
+  if err != nil {
+    t.Errorf("method RegisterAccount returned not nil error, account => %v", acc)
+  }
+
+  err = svc.Deposit(acc.ID, 100_00)
+  if err != nil {
+    t.Errorf("method Deposit returned not nil error, error => %v", err)
+  }
+
+  _, err = svc.Pay(acc.ID, 1, "Cafe")
+  payN, err := svc.Pay(acc.ID, 2, "Auto")
+  _, err = svc.Pay(acc.ID, 3, "MarketShop")
+  if err != nil {
+    t.Errorf("method Pay returned not nil error, err => %v", err)
+  }
+
+  _, err = svc.FavoritePayment(payN.ID, "love")
+  if err != nil {
+    t.Errorf("method Pay returned not nil error, err => %v", err)
+  }
+  
+  err = svc.Export("../../data")
+  if err != nil {
+    t.Errorf("method Export returned not nil error, err => %v", err)
+  }
+}
+
+func TestService_ExportHistory_success_one_file(t *testing.T) {
+  svc := Service{}
+
+  acc, err := svc.RegisterAccount("+992000000001")
+
+  if err != nil {
+    t.Errorf("method RegisterAccount returned not nil error, account => %v", acc)
+  }
+
+  err = svc.Deposit(acc.ID, 100_00)
+  if err != nil {
+    t.Errorf("method Deposit returned not nil error, error => %v", err)
+  }
+
+  _, err = svc.Pay(acc.ID, 1, "Cafe")
+  _, err = svc.Pay(acc.ID, 2, "Auto")
+  _, err = svc.Pay(acc.ID, 3, "MarketShop")
+  if err != nil {
+    t.Errorf("method Pay returned not nil error, err => %v", err)
+  }
+
+  payments, err := svc.ExportAccountHistory(acc.ID)
+  if err != nil {
+    t.Errorf("method ExportAccountHistory returned not nil error, err => %v", err)
+  }
+
+  err = svc.HistoryToFiles(payments, "../../data", 1)
+  if err != nil {
+    t.Errorf("method HistoryToFiles returned not nil error, err => %v", err)
+  }
+}
+
+func TestService_FavoritePayment_fail(t *testing.T) {
+  s := newTestService()
+  _, _, err := s.addAccount(defaultTestAccount)
+  if err != nil {
+    t.Errorf("%v", err)
+    return
+  }
+  payment := uuid.New().String()
+  _, err = s.FavoritePayment(payment, "score AlifAcademy")
+  if err == ErrFavoriteNotFound {
+    t.Errorf("%v", err)
+    return
+  }
+
+}
+func TestService_PayFromFavorite_success(t *testing.T) {
+  s := newTestService()
+  _, payments, err := s.addAccount(defaultTestAccount)
+  if err != nil {
+    t.Errorf("error = %v", err)
+    return
+  }
+
+  payment := payments[0]
+
+  favorite, err := s.FavoritePayment(payment.ID, "score AlifAcademy")
+  if err != nil {
+    t.Errorf("%v", err)
+    return
+  }
+  _, err = s.PayFromFavorite(favorite.ID)
+  if err != nil {
+    t.Error("PayFromFavorite(): must return error, returned nil")
+    return
+  }
+
+  fmt.Println(payment.ID)
+}
+
+
+func TestService_FavoritePayment_success(t *testing.T) {
+  s := newTestService()
+  _, payments, err := s.addAccount(defaultTestAccount)
+  if err != nil {
+    t.Errorf("%v", err)
+    return
+  }
+  payment := payments[0]
+
+  _, err = s.FavoritePayment(payment.ID, "score AlifAcademy")
+  if err != nil {
+    t.Errorf("%v", err)
+    return
+  }
+
+}
+
+func TestSumPayments(t *testing.T) {
+	
+	s:=Service{}
+
+	account,err:=s.RegisterAccount("909796600")
+	if err!= nil{
+		t.Error(err)
+	}
+	
+	err =s.Deposit(account.ID, 10_000_00)
+	err= s.Deposit(account.ID, 20_000_00)
+	err= s.Deposit(account.ID, 30_000_00)
+	
+	if err != nil {
+		t.Errorf("can not deposit account, error = %v", err)
+		return
+	}
+	//осуществляем платёж на его счёт
+	
+	_, err = s.Pay(account.ID, 1000_00, "auto")
+	if err != nil {
+		t.Errorf(" can not creat payment, error = %v", err)
+		return
+	}
+	_, err = s.Pay(account.ID, 2000_00, "auto")
+	if err != nil {
+		t.Errorf(" can not creat payment, error = %v", err)
+		return
+	}
+	_, err = s.Pay(account.ID, 3000_00, "auto")
+	if err != nil {
+		t.Errorf(" can not creat payment, error = %v", err)
+		return
+	}
+	want:=types.Money(6000_00)
+
+	
+		result:=s.SumPayments(10)
+	
+		if !reflect.DeepEqual(result,want){
+			t.Errorf(" can not creat payment, error = %v", err)
+			return	
+		}
+		}
+	
 	
