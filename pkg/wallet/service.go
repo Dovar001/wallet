@@ -7,7 +7,7 @@ import (
 	"log"
 	
 	"sync"
-
+    "math"
 	"os"
     "strconv"
 	"strings"
@@ -774,7 +774,7 @@ return sum
 }
 
 
-
+/*
 func (s *Service) FilterPayments(accountID int64, goroutines int) ([]types.Payment, error){
 
 	wg := sync.WaitGroup{}
@@ -901,4 +901,42 @@ wg.Wait()
 	return accpayments,nil
 	}
 return accpayments,nil
+}
+
+*/
+func (s *Service) FilterPaymentsByFn(
+	filter func(payment types.Payment) bool, goroutines int,
+) ([]types.Payment, error) {
+
+	if goroutines <= 1 {
+		payments := make([]types.Payment, 0)
+		for _, payment := range s.payments {
+			if filter(*payment) == true {
+				payments = append(payments, *payment)
+			}
+		}
+		return payments, nil
+	}
+	wg := sync.WaitGroup{}
+	mu := sync.Mutex{}
+	wg.Add(goroutines)
+	sliceLen := int(math.Ceil(float64(len(s.payments)) / float64(goroutines)))
+	payments := make([]types.Payment, 0)
+	for i := 0; i < len(s.payments); i += sliceLen {
+		if i+sliceLen > len(s.payments) {
+			sliceLen = len(s.payments) - i
+		}
+		go func(j int, len int) {
+			mu.Lock()
+			for ; j < len; j++ {
+				if filter(*s.payments[j]) == true {
+					payments = append(payments, *s.payments[j])
+				}
+			}
+			mu.Unlock()
+			wg.Done()
+		}(i, sliceLen+i)
+	}
+	wg.Wait()
+	return payments, nil
 }
