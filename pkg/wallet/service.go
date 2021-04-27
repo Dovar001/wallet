@@ -904,6 +904,40 @@ return accpayments,nil
 }
 
 */
+
+func (s *Service) FilterPayments(accountID int64, goroutines int) ([]types.Payment, error) {
+	_, err := s.FindAccountByID(accountID)
+	if err != nil {
+		return nil, err
+	}
+	if goroutines <= 1 {
+		return s.ExportAccountHistory(accountID)
+	}
+	wg := sync.WaitGroup{}
+	mu := sync.Mutex{}
+	wg.Add(goroutines)
+	sliceLen := int(math.Ceil(float64(len(s.payments)) / float64(goroutines)))
+	payments := make([]types.Payment, 0)
+	for i := 0; i < len(s.payments); i += sliceLen {
+		if i+sliceLen > len(s.payments) {
+			sliceLen = len(s.payments) - i
+		}
+		go func(j int, len int) {
+			mu.Lock()
+			for ; j < len; j++ {
+				if s.payments[j].AccountID == accountID {
+					payments = append(payments, *s.payments[j])
+				}
+			}
+			mu.Unlock()
+			wg.Done()
+		}(i, sliceLen+i)
+	}
+	wg.Wait()
+	return payments, nil
+}
+
+
 func (s *Service) FilterPaymentsByFn(
 	filter func(payment types.Payment) bool, goroutines int,
 ) ([]types.Payment, error) {
