@@ -769,52 +769,6 @@ func TestExport(t *testing.T) {
   
 	err = s.HistoryToFiles(payments, "data", 9)
   }
-
-func BenchmarkSumPayments(b *testing.B) {
-	
-	s:=Service{}
-
-	account,err:=s.RegisterAccount("909796600")
-	if err!= nil{
-		b.Error(err)
-	}
-	
-	err =s.Deposit(account.ID, 10_000_00)
-	err= s.Deposit(account.ID, 20_000_00)
-	err= s.Deposit(account.ID, 30_000_00)
-	
-	if err != nil {
-		b.Errorf("can not deposit account, error = %v", err)
-		return
-	}
-	//осуществляем платёж на его счёт
-	
-	_, err = s.Pay(account.ID, 1000_00, "auto")
-	if err != nil {
-		b.Errorf(" can not creat payment, error = %v", err)
-		return
-	}
-	_, err = s.Pay(account.ID, 2000_00, "auto")
-	if err != nil {
-		b.Errorf(" can not creat payment, error = %v", err)
-		return
-	}
-	_, err = s.Pay(account.ID, 3000_00, "auto")
-	if err != nil {
-		b.Errorf(" can not creat payment, error = %v", err)
-		return
-	}
-	want:=types.Money(6000_00)
-
-	for i := 0; i < b.N; i++ {
-		result:=s.SumPayments(10)
-		if result!=want {
-			b.Fatalf("invalid result, got %v, want %v", result, want)
-		}
-	}
-	
-}
-
 	
 func TestService_ExportHistory_success_user(t *testing.T) {
   svc := Service{}
@@ -1065,8 +1019,7 @@ func Test(t *testing.T) {
 				}
 				}
 				*/
-		
-				func TestService_ExportToFile_success(t *testing.T) {
+             func TestService_ExportToFile_success(t *testing.T) {
 					svc := Service{}
 				  
 					acc, err := svc.RegisterAccount("+992000000001")
@@ -1097,3 +1050,165 @@ func Test(t *testing.T) {
 					  t.Errorf("method Export returned not nil error, err => %v", err)
 					}
 				  }
+
+				  func BenchmarkSumPayments(b *testing.B) {
+	
+					s:=Service{}
+				
+					account,err:=s.RegisterAccount("909796600")
+					if err!= nil{
+						b.Error(err)
+					}
+					
+					err =s.Deposit(account.ID, 10_000_00)
+					err= s.Deposit(account.ID, 20_000_00)
+					err= s.Deposit(account.ID, 30_000_00)
+					
+					if err != nil {
+						b.Errorf("can not deposit account, error = %v", err)
+						return
+					}
+					//осуществляем платёж на его счёт
+					
+					_, err = s.Pay(account.ID, 1000_00, "auto")
+					if err != nil {
+						b.Errorf(" can not creat payment, error = %v", err)
+						return
+					}
+					_, err = s.Pay(account.ID, 2000_00, "auto")
+					if err != nil {
+						b.Errorf(" can not creat payment, error = %v", err)
+						return
+					}
+					_, err = s.Pay(account.ID, 3000_00, "auto")
+					if err != nil {
+						b.Errorf(" can not creat payment, error = %v", err)
+						return
+					}
+					want:=types.Money(6000_00)
+				
+					for i := 0; i < b.N; i++ {
+						result:=s.SumPayments(10)
+						if result!=want {
+							b.Fatalf("invalid result, got %v, want %v", result, want)
+						}
+					}
+					
+				}
+
+				
+				func BenchmarkSumPaymentsWithProgress(b *testing.B) {
+	
+					s:=Service{}
+				
+					account,err:=s.RegisterAccount("909796600")
+					if err!= nil{
+						b.Error(err)
+					}
+					
+					err =s.Deposit(account.ID, 10_000_00)
+					err= s.Deposit(account.ID, 20_000_00)
+					err= s.Deposit(account.ID, 30_000_00)
+					
+					if err != nil {
+						b.Errorf("can not deposit account, error = %v", err)
+						return
+					}
+					//осуществляем платёж на его счёт
+					
+					_, err = s.Pay(account.ID, 1000_00, "auto")
+					if err != nil {
+						b.Errorf(" can not creat payment, error = %v", err)
+						return
+					}
+					_, err = s.Pay(account.ID, 2000_00, "auto")
+					if err != nil {
+						b.Errorf(" can not creat payment, error = %v", err)
+						return
+					}
+					_, err = s.Pay(account.ID, 3000_00, "auto")
+					if err != nil {
+						b.Errorf(" can not creat payment, error = %v", err)
+						return
+					}
+					_, err = s.Pay(account.ID, 2000_00, "auto")
+					if err != nil {
+						b.Errorf(" can not creat payment, error = %v", err)
+						return
+					}
+					_, err = s.Pay(account.ID, 3000_00, "auto")
+					if err != nil {
+						b.Errorf(" can not creat payment, error = %v", err)
+						return
+					}
+				
+                    want := types.Money(11000_00)
+					
+					for i := 0; i < b.N; i++ {
+						result:=s.SumPaymentsWithProgress()
+						
+						prog:= <-result
+						if prog.Result != want {
+							b.Fatalf("invalid result, got %v", prog.Result)
+						}
+					}
+					
+				}
+
+				func TestSumPaymentsWithProgress(t *testing.T) {
+	
+					s:=Service{}
+				
+					account,err:=s.RegisterAccount("909796600")
+					if err!= nil{
+						t.Error(err)
+					}
+					
+					err =s.Deposit(account.ID, 10_000_00)
+					err= s.Deposit(account.ID, 20_000_00)
+					err= s.Deposit(account.ID, 30_000_00)
+					
+					if err != nil {
+						t.Errorf("can not deposit account, error = %v", err)
+						return
+					}
+					//осуществляем платёж на его счёт
+					
+					_, err = s.Pay(account.ID, 1000_00, "auto")
+					if err != nil {
+						t.Errorf(" can not creat payment, error = %v", err)
+						return
+					}
+					_, err = s.Pay(account.ID, 2000_00, "auto")
+					if err != nil {
+						t.Errorf(" can not creat payment, error = %v", err)
+						return
+					}
+					_, err = s.Pay(account.ID, 3000_00, "auto")
+					if err != nil {
+						t.Errorf(" can not creat payment, error = %v", err)
+						return
+					}
+					_, err = s.Pay(account.ID, 2000_00, "auto")
+					if err != nil {
+						t.Errorf(" can not creat payment, error = %v", err)
+						return
+					}
+					_, err = s.Pay(account.ID, 3000_00, "auto")
+					if err != nil {
+						t.Errorf(" can not creat payment, error = %v", err)
+						return
+					}
+				
+                    want := types.Money(11000_00)
+					
+				
+						result:=s.SumPaymentsWithProgress()
+						
+						prog:= <-result
+						if prog.Result != want {
+							t.Fatalf("invalid result, got %v", prog.Result)
+						}
+					}
+					
+				
